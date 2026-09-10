@@ -1,0 +1,63 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource/space-mono";
+
+@plugin "tailwindcss-animate";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: 'Geist Variable', system-ui, sans-serif;
+  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  
+  --color-background: #140D0A;
+  --color-foreground: #F5F1EB;
+  
+  --color-card: #140D0A;
+  --color-card-foreground: #F5F1EB;
+  
+  --color-popover: #241612;
+  --color-popover-foreground: #F5F1EB;
+  
+  --color-primary: #D28A4C;
+  --color-primary-foreground: #140D0A;
+  
+  --color-secondary: #38220F;
+  --color-secondary-foreground: #CFB28C;
+  
+  --color-muted: #2F1D15;
+  --color-muted-foreground: #CFB28C;
+  
+  --color-accent: #E89B55;
+  --color-accent-foreground: #140D0A;
+  
+  --color-destructive: #ED1B2E;
+  --color-destructive-foreground: #FFFFFF;
+  
+  --color-border: #3F2319;
+  --color-input: #55321F;
+  --color-ring: #D28A4C;
+  
+  --color-success: #00A66C;
+  
+  --radius-lg: 12px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans font-bold;
+  }
+  .font-mono-style {
+    @apply font-mono tracking-wide;
+  }
+}
