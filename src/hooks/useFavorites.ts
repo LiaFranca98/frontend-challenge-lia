@@ -10,7 +10,7 @@ export function useFavorites() {
   const favoritesQuery = useQuery({
     queryKey: ['favorites'],
     queryFn: async () => {
-      const { data } = await axios.get<{ favorites: NFT[] }>('/api/favorites');
+      const { data } = await axios.get<{ favorites: NFT[] }>('/favorites');
       return data.favorites;
     },
     enabled: !!user,
@@ -19,7 +19,7 @@ export function useFavorites() {
 
   const addFavoriteMutation = useMutation({
     mutationFn: async (nftId: string) => {
-      await axios.post('/api/favorites', { nftId });
+      await axios.post('/favorites', { nftId });
     },
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });
@@ -35,7 +35,7 @@ export function useFavorites() {
 
   const removeFavoriteMutation = useMutation({
     mutationFn: async (nftId: string) => {
-      await axios.delete(`/api/favorites/${nftId}`);
+      await axios.delete(`/favorites/${nftId}`);
     },
     onMutate: async (nftId) => {
       await queryClient.cancelQueries({ queryKey: ['favorites'] });

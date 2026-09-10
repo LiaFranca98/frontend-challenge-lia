@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { db } from '../db';
+import { db, saveDb } from '../db';
 import { getUserFromAuth } from './auth';
 
 export const favoritesHandlers = [
@@ -31,6 +31,7 @@ export const favoritesHandlers = [
     const userFavs = db.favorites.get(user.id) || [];
     if (!userFavs.includes(nftId)) {
       db.favorites.set(user.id, [...userFavs, nftId]);
+      saveDb();
     }
 
     return HttpResponse.json({ success: true });

@@ -15,7 +15,7 @@ export const Route = createFileRoute('/checkout')({
 
 function CheckoutPage() {
   const { data: cartItems = [] } = useCart();
-  const { data: catalogData } = useCatalog({});
+  const { data: catalogData } = useCatalog({ limit: 100 });
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();

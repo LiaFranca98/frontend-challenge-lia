@@ -1,18 +1,22 @@
 import { http, HttpResponse } from 'msw';
-import { db } from '../db';
+import { db, saveDb } from '../db';
 import type { User } from '@/domain/types';
 
 // Helper to check authentication
 export const getUserFromAuth = (request: Request): User | null => {
-  const cookieHeader = request.headers.get('Cookie');
-  if (!cookieHeader) return null;
-  
-  // parse cookies
-  const cookies = Object.fromEntries(
-    cookieHeader.split(';').map(c => c.trim().split('='))
-  );
-  
-  const token = cookies['auth-token'];
+  const authHeader = request.headers.get('Authorization');
+  let token = '';
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    token = authHeader.substring(7);
+  } else {
+    const cookieHeader = request.headers.get('Cookie');
+    if (cookieHeader) {
+      const cookies = Object.fromEntries(
+        cookieHeader.split(';').map(c => c.trim().split('='))
+      );
+      token = cookies['auth-token'];
+    }
+  }
   if (!token) return null;
 
   const userId = db.sessions.get(token);
@@ -35,9 +39,10 @@ export const authHandlers = [
           id: 'user-demo',
           name: 'Demo User',
           email: 'demo@example.com',
-          wallets: []
+          wallets: [{ address: '0x123...abc', balance: '10.5 ETH' }]
         };
         db.users.push(user);
+        saveDb();
       } else {
         return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 });
       }
@@ -45,8 +50,9 @@ export const authHandlers = [
 
     const token = `token-${user.id}-${Date.now()}`;
     db.sessions.set(token, user.id);
+    saveDb();
 
-    return HttpResponse.json({ user }, {
+    return HttpResponse.json({ user, token }, {
       headers: {
         'Set-Cookie': `auth-token=${token}; Path=/; HttpOnly; SameSite=Lax`,
       }
@@ -67,11 +73,13 @@ export const authHandlers = [
       wallets: []
     };
     db.users.push(newUser);
+    saveDb();
 
     const token = `token-${newUser.id}-${Date.now()}`;
     db.sessions.set(token, newUser.id);
+    saveDb();
 
-    return HttpResponse.json({ user: newUser }, {
+    return HttpResponse.json({ user: newUser, token }, {
       headers: {
         'Set-Cookie': `auth-token=${token}; Path=/; HttpOnly; SameSite=Lax`,
       }
@@ -102,6 +110,7 @@ export const authHandlers = [
     
     const updates = await request.json() as Partial<User>;
     Object.assign(user, updates);
+    saveDb();
     
     return HttpResponse.json({ user });
   })

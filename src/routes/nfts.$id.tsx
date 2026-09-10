@@ -69,8 +69,10 @@ function NFTDetailPage() {
           <div className="relative flex-1 aspect-square rounded-[40px] overflow-hidden bg-muted">
             <img 
               src={nft.imageUrl} 
-              alt={nft.title} 
-              className="object-cover w-full h-full" 
+              alt={nft.title}
+              width={600}
+              height={600}
+              className="w-full h-full object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
             />
             {!isAvailable && (
               <div className="absolute inset-0 bg-background/60 flex items-center justify-center backdrop-blur-sm">

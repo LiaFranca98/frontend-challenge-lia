@@ -1,5 +1,5 @@
 import { http, HttpResponse, delay } from 'msw';
-import { db } from '../db';
+import { db, saveDb } from '../db';
 
 export const cartHandlers = [
   http.get('/api/cart', async ({ request }) => {
@@ -37,6 +37,7 @@ export const cartHandlers = [
     }
 
     db.carts.set(sessionId, cart);
+    saveDb();
     return HttpResponse.json(cart);
   }),
 ];

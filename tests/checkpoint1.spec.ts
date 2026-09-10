@@ -14,7 +14,7 @@ test.describe('Checkpoint 1: Catálogo, Detalhe e Carrinho', () => {
       // 1. Catálogo
       await page.goto('/');
       // Aguardar carregamento dos mocks MSW e React Query
-      await page.waitForSelector('text=Midnight Blossom', { state: 'visible' });
+      await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
       
       // Screenshot catálogo
       await page.screenshot({ 
@@ -25,10 +25,10 @@ test.describe('Checkpoint 1: Catálogo, Detalhe e Carrinho', () => {
       // Validar persistência na URL e paginação
       const filterInput = page.locator('input[name="q"]');
       if (await filterInput.isVisible()) {
-        await filterInput.fill('wind');
+        await page.locator('form').getByPlaceholder('Buscar colecionáveis...').fill('cosmic');
         await page.locator('form').getByRole('button', { name: 'IR' }).click();
-        await page.waitForURL('**/?q=wind*');
-        await page.waitForSelector('text=Wind Weaver', { state: 'visible' });
+        await page.waitForURL('**/?q=cosmic*');
+        await page.waitForSelector('text=Cosmic Bloom', { state: 'visible' });
         
         await page.screenshot({ 
           path: `/Users/lia/.gemini/antigravity-ide/brain/a948781e-a012-4571-8496-0bcf1d7bb847/scratch/catalog-filtered-${size.name}.png`,
@@ -42,9 +42,9 @@ test.describe('Checkpoint 1: Catálogo, Detalhe e Carrinho', () => {
 
       // 2. Navegar para detalhe
       await page.goto('/');
-      await page.waitForSelector('text=Midnight Blossom', { state: 'visible' });
-      await page.getByText('Midnight Blossom').first().click();
-      await page.waitForURL('**/nfts/nft-6');
+      await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
+      await page.getByText('Emerald Ape').first().click();
+      await page.waitForURL('**/nfts/nft-1');
       await page.waitForSelector('text=Comprar', { state: 'visible' });
 
       await page.screenshot({ 

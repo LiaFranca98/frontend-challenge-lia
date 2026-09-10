@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { db } from '../db';
+import { db, saveDb } from '../db';
 import { getUserFromAuth } from './auth';
 import type { CartItem, Order } from '@/domain/types';
 
@@ -61,6 +61,7 @@ export const checkoutHandlers = [
     };
 
     db.orders.push(order);
+    saveDb();
 
     if (idempotencyKey) {
       processedOrders.set(idempotencyKey, order);
@@ -72,6 +73,7 @@ export const checkoutHandlers = [
       const currentCart = db.carts.get(sessionId) || [];
       const newCart = currentCart.filter(c => !successfulItems.some(s => s.nftId === c.nftId));
       db.carts.set(sessionId, newCart);
+      saveDb();
     }
 
     return HttpResponse.json({ 

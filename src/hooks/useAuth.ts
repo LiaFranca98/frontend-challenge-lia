@@ -8,7 +8,7 @@ export function useAuth() {
   const profileQuery = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      const { data } = await axios.get<{ user: User }>('/api/profile');
+      const { data } = await axios.get<{ user: User }>('/profile');
       return data.user;
     },
     retry: false,
@@ -17,7 +17,8 @@ export function useAuth() {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { email: string; password?: string }) => {
-      const { data } = await axios.post<{ user: User }>('/api/auth/login', credentials);
+      const { data } = await axios.post<{ user: User; token: string }>('/auth/login', credentials);
+      localStorage.setItem('auth-token', data.token);
       return data.user;
     },
     onSuccess: (user) => {
@@ -27,7 +28,8 @@ export function useAuth() {
 
   const signupMutation = useMutation({
     mutationFn: async (payload: { name: string; email: string; password?: string }) => {
-      const { data } = await axios.post<{ user: User }>('/api/auth/signup', payload);
+      const { data } = await axios.post<{ user: User; token: string }>('/auth/signup', payload);
+      localStorage.setItem('auth-token', data.token);
       return data.user;
     },
     onSuccess: (user) => {
@@ -37,16 +39,17 @@ export function useAuth() {
 
   const logoutMutation = useMutation({
     mutationFn: async () => {
-      await axios.post('/api/auth/logout');
+      await axios.post('/auth/logout');
     },
     onSuccess: () => {
+      localStorage.removeItem('auth-token');
       queryClient.clear(); // Explicitly clear all cache as per T023
     },
   });
 
   const updateProfileMutation = useMutation({
     mutationFn: async (updates: Partial<User>) => {
-      const { data } = await axios.patch<{ user: User }>('/api/profile', updates);
+      const { data } = await axios.patch<{ user: User }>('/profile', updates);
       return data.user;
     },
     onSuccess: (user) => {

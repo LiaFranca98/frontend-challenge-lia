@@ -12,16 +12,16 @@
   --font-sans: 'Geist Variable', system-ui, sans-serif;
   --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   
-  --color-background: #140D0A;
+  --color-background: #0D0B0A;
   --color-foreground: #F5F1EB;
   
-  --color-card: #140D0A;
+  --color-card: #110E0C;
   --color-card-foreground: #F5F1EB;
   
   --color-popover: #241612;
   --color-popover-foreground: #F5F1EB;
   
-  --color-primary: #D28A4C;
+  --color-primary: #E89B55;
   --color-primary-foreground: #140D0A;
   
   --color-secondary: #38220F;

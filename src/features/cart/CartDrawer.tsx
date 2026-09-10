@@ -7,7 +7,7 @@ import { Link } from '@tanstack/react-router';
 export function CartDrawer() {
   const { isOpen, closeCart } = useCartStore();
   const { data: cartItems = [] } = useCart();
-  const { data: catalogData } = useCatalog({});
+  const { data: catalogData } = useCatalog({ limit: 100 });
   
   if (!isOpen) return null;
 
@@ -55,7 +55,7 @@ export function CartDrawer() {
             </div>
           ) : (
             enhancedItems.map((item) => (
-              <div key={item.nftId} className="flex gap-4 p-4 border border-border rounded-xl bg-background">
+              <div key={item.nftId} className="flex gap-4 p-4 border border-border rounded-xl bg-[#241612]">
                 <div className="h-20 w-20 rounded-md overflow-hidden flex-shrink-0">
                   <img src={item.nft!.imageUrl} alt={item.nft!.title} className="h-full w-full object-cover" />
                 </div>

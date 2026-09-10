@@ -22,7 +22,7 @@ export function CatalogFilters() {
   };
 
   return (
-    <div className="space-y-8 pr-4 font-mono-style text-sm text-foreground">
+    <div className="space-y-8 p-6 font-mono-style text-sm text-foreground bg-[#241612] rounded-xl border border-border">
       
       {/* Hidden search for E2E tests and actual search functionality */}
       <form onSubmit={handleSearch} className="space-y-2 mb-8">
@@ -30,7 +30,7 @@ export function CatalogFilters() {
           <Input 
             name="q"
             defaultValue={searchParams.q || ''}
-            placeholder="Buscar..." 
+            placeholder="Buscar colecionáveis..." 
             className="bg-transparent border-border text-foreground h-9"
           />
           <Button type="submit" className="bg-primary text-primary-foreground h-9 uppercase">IR</Button>
