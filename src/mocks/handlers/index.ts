@@ -3,10 +3,12 @@ import { catalogHandlers } from './catalog';
 import { cartHandlers } from './cart';
 import { authHandlers } from './auth';
 import { favoritesHandlers } from './favorites';
+import { checkoutHandlers } from './checkout';
 
 export const handlers: HttpHandler[] = [
   ...catalogHandlers,
   ...cartHandlers,
   ...authHandlers,
   ...favoritesHandlers,
+  ...checkoutHandlers,
 ];

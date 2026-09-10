@@ -1,12 +1,13 @@
 import { Link } from '@tanstack/react-router';
 import { Search, ShoppingCart, LogIn, Menu, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/useCart';
+import { useCart, useCartStore } from '@/hooks/useCart';
 import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
   const { data: cartItems = [] } = useCart();
   const { user } = useAuth();
+  const { openCart } = useCartStore();
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
@@ -46,7 +47,7 @@ export function Header() {
             <span className="sr-only">Buscar</span>
           </button>
           
-          <Link to="/" className="relative hover:text-foreground transition-colors">
+          <button onClick={openCart} className="relative hover:text-foreground transition-colors">
             <ShoppingCart className="h-5 w-5" />
             {cartCount > 0 && (
               <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground font-mono-style">
@@ -54,7 +55,7 @@ export function Header() {
               </span>
             )}
             <span className="sr-only">Carrinho</span>
-          </Link>
+          </button>
           
           {user ? (
             <>
