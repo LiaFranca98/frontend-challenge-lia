@@ -7,15 +7,15 @@ import { Link } from '@tanstack/react-router';
 export function CartDrawer() {
   const { isOpen, closeCart } = useCartStore();
   const { data: cartItems = [] } = useCart();
-  const { data: catalogData } = useCatalog(); // Or use a specific hook to fetch multiple NFTs by ID
+  const { data: catalogData } = useCatalog({});
   
   if (!isOpen) return null;
 
-  const nfts = catalogData?.items || [];
+  const nfts = catalogData?.data || [];
   
   // Enhance cart items with NFT details
   const enhancedItems = cartItems.map(item => {
-    const nft = nfts.find(n => n.id === item.nftId);
+    const nft = nfts.find((n: any) => n.id === item.nftId);
     return { ...item, nft };
   }).filter(item => item.nft);
 

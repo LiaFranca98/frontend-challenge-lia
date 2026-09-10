@@ -15,7 +15,7 @@ export const Route = createFileRoute('/checkout')({
 
 function CheckoutPage() {
   const { data: cartItems = [] } = useCart();
-  const { data: catalogData } = useCatalog();
+  const { data: catalogData } = useCatalog({});
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -23,10 +23,10 @@ function CheckoutPage() {
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const nfts = catalogData?.items || [];
+  const nfts = catalogData?.data || [];
   
   const enhancedItems = cartItems.map(item => {
-    const nft = nfts.find(n => n.id === item.nftId);
+    const nft = nfts.find((n: any) => n.id === item.nftId);
     return { ...item, nft };
   }).filter(item => item.nft);
 

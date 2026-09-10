@@ -49,10 +49,15 @@ export const checkoutHandlers = [
     const order: Order = {
       id: `order-${Date.now()}`,
       userId: user ? user.id : 'guest',
+      walletId: user && user.wallets.length > 0 ? user.wallets[0].id : 'guest-wallet',
       status: 'confirmed',
       items: successfulItems,
       subtotalEth: subtotalEth.toString(),
       networkFeeEth: '0.005',
+      discountEth: '0',
+      totalEth: (subtotalEth + 0.005).toString(),
+      idempotencyKey: idempotencyKey || '',
+      createdAt: new Date().toISOString(),
     };
 
     db.orders.push(order);
