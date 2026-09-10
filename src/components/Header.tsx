@@ -1,10 +1,12 @@
 import { Link } from '@tanstack/react-router';
-import { Search, ShoppingCart, LogIn, Menu } from 'lucide-react';
+import { Search, ShoppingCart, LogIn, Menu, User, Heart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/useCart';
+import { useAuth } from '@/hooks/useAuth';
 
 export function Header() {
   const { data: cartItems = [] } = useCart();
+  const { user } = useAuth();
   const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
@@ -54,10 +56,27 @@ export function Header() {
             <span className="sr-only">Carrinho</span>
           </Link>
           
-          <Button className="hidden md:flex gap-2 bg-primary text-primary-foreground hover:bg-primary/90 ml-2 font-mono-style uppercase h-9 rounded-md px-4">
-            <LogIn className="h-4 w-4" />
-            Entrar
-          </Button>
+          {user ? (
+            <>
+              <Link to="/favorites" className="hover:text-primary transition-colors">
+                <Heart className="h-5 w-5" />
+                <span className="sr-only">Favoritos</span>
+              </Link>
+              <Link to="/profile">
+                <Button variant="outline" className="hidden md:flex gap-2 ml-2 font-mono-style uppercase h-9 rounded-md px-4 border-border hover:bg-background/80">
+                  <User className="h-4 w-4" />
+                  {user.name.split(' ')[0]}
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link to="/login">
+              <Button className="hidden md:flex gap-2 bg-primary text-primary-foreground hover:bg-primary/90 ml-2 font-mono-style uppercase h-9 rounded-md px-4">
+                <LogIn className="h-4 w-4" />
+                Entrar
+              </Button>
+            </Link>
+          )}
 
           <button className="md:hidden hover:text-foreground transition-colors">
             <Menu className="h-5 w-5" />
