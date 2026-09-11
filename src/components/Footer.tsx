@@ -2,7 +2,7 @@ import { Link } from '@tanstack/react-router';
 
 export function Footer() {
   return (
-    <footer className="text-foreground">
+    <footer className="hidden md:block text-foreground">
       {/* SEÇÃO 1: Features e Newsletter */}
       <div className="max-w-[1200px] mx-auto">
         <div className="bg-[#241612] rounded-t-none">

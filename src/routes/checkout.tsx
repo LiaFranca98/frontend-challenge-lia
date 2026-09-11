@@ -4,7 +4,7 @@ import { useCatalog } from '@/hooks/useCatalog';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
-import { X } from 'lucide-react';
+import { X, ChevronLeft, MoreVertical, Wallet } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/api/axios';
 import type { Order } from '@/domain/types';
@@ -22,7 +22,8 @@ function CheckoutPage() {
 
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedWallet, setSelectedWallet] = useState('coinbase');
+  const [selectedWallet, setSelectedWallet] = useState('reserva');
+  const [selectedNetworkWallet, setSelectedNetworkWallet] = useState('coinbase');
 
   const [couponInput, setCouponInput] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -95,149 +96,291 @@ function CheckoutPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-8 py-10 font-mono-style">
-      {/* Breadcrumb */}
-      <div className="text-muted-foreground text-sm uppercase mb-8 font-mono-style">
-        <Link to="/" className="hover:text-foreground">Início</Link> /
-        <Link to="/" className="hover:text-foreground"> Mercado</Link> / Pagamento
-      </div>
+    <div className="container mx-auto px-4 md:px-8 py-4 md:py-10 font-mono-style">
+      {/* MOBILE VIEW (Pixel Perfect Matching Figma & Reference Screenshot) */}
+      <div className="md:hidden pb-12">
+        {/* Top Header */}
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            onClick={() => navigate({ to: '/' })}
+            className="w-10 h-10 rounded-full bg-[#241712] flex items-center justify-center text-[#CFB28C] hover:text-primary transition-colors shrink-0"
+            aria-label="Voltar"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <h1 className="text-lg font-bold font-mono-style text-foreground">Pagamento com carteira</h1>
+        </div>
 
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* LEFT: Collector Profile Form */}
-        <div className="flex-1 space-y-3">
-          <h2 className="text-lg font-bold text-foreground">Perfil do colecionador</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <InputField label="Nome de exibição" required value={form.displayName} onChange={v => setForm(f => ({...f, displayName: v}))} />
-            <InputField label="Nome de usuário" required value={form.username} onChange={v => setForm(f => ({...f, username: v}))} />
-            <SelectField label="Rede" required options={['Selecione uma rede', 'Ethereum', 'Polygon', 'Solana']} />
-            <InputField label="Nome do perfil" required value={form.profileName} onChange={v => setForm(f => ({...f, profileName: v}))} />
-            <InputField label="Endereço da carteira" required placeholder="Endereço 0x da carteira" value={form.walletAddress} onChange={v => setForm(f => ({...f, walletAddress: v}))} />
-            <InputField label="ENS ou carteira secundária (opcional)" placeholder="ENS ou carteira secundária (opcional)" value={form.secondaryWallet} onChange={v => setForm(f => ({...f, secondaryWallet: v}))} />
-            <SelectField label="Tipo de carteira" required options={['Selecione uma carteira', 'MetaMask', 'Coinbase Wallet', 'WalletConnect']} />
-            <InputField label="Código de indicação" required value={form.referralCode} onChange={v => setForm(f => ({...f, referralCode: v}))} />
-            <InputField label="E-mail" required type="email" value={form.email} onChange={v => setForm(f => ({...f, email: v}))} />
-            <div className="flex gap-2 items-end">
-              <div className="w-20">
-                <label className="block text-xs text-foreground mb-2">Nome ENS <span className="text-primary">*</span></label>
-                <select className="w-full bg-transparent border border-border text-foreground px-2 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary">
-                  <option>.eth</option>
-                </select>
-              </div>
-              <div className="flex-1">
-                <input className="w-full bg-transparent border border-border text-foreground px-3 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary" value={form.ensName} onChange={e => setForm(f => ({...f, ensName: e.target.value}))} />
-              </div>
-            </div>
+        {/* Section 1: Carteira conectada */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-bold text-foreground font-mono-style text-sm">Carteira conectada</h2>
+            <button className="text-[#C88A4B] text-xs font-mono-style hover:underline">Trocar carteira</button>
           </div>
 
-          <div className="flex items-center gap-2 mt-4">
-            <div className={`w-4 h-4 rounded-full border-2 ${form.useOtherWallet ? 'border-primary bg-primary' : 'border-primary'} cursor-pointer flex items-center justify-center`} onClick={() => setForm(f => ({...f, useOtherWallet: !f.useOtherWallet}))}>
-              {form.useOtherWallet && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+          {/* Card Reserva */}
+          <div
+            onClick={() => setSelectedWallet('reserva')}
+            className={`p-4 rounded-[16px] bg-[#1c120e] border ${selectedWallet === 'reserva' ? 'border-[#C88A4B]/50 bg-[#221510]' : 'border-[#331c13]'} flex items-center justify-between cursor-pointer transition-colors mb-3`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border ${selectedWallet === 'reserva' ? 'border-[#C88A4B] flex items-center justify-center' : 'border-[#55321F]'}`}>
+                {selectedWallet === 'reserva' && <div className="w-2.5 h-2.5 rounded-full bg-[#C88A4B]" />}
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-foreground font-mono-style">Reserva</h3>
+                <p className="text-xs text-[#CFB28C] font-mono-style">nova.kurio.eth</p>
+                <p className="text-[11px] text-[#8E7564] font-mono-style">Rede Polygon</p>
+              </div>
             </div>
-            <span className="text-sm">Usar outra carteira?</span>
+            <button className="text-[#8E7564] hover:text-foreground p-1" aria-label="Opções">
+              <MoreVertical className="w-4 h-4" />
+            </button>
           </div>
 
-          <div className="mt-6">
-            <label className="block text-sm text-foreground mb-2">Observação do colecionador (opcional)</label>
-            <textarea 
-              className="w-full max-w-[350px] bg-transparent border border-border text-foreground px-3 py-3 text-sm rounded-sm focus:outline-none focus:border-primary h-36 resize-none"
-              value={form.notes}
-              onChange={e => setForm(f => ({...f, notes: e.target.value}))}
-            />
+          {/* Card Principal */}
+          <div
+            onClick={() => setSelectedWallet('principal')}
+            className={`p-4 rounded-[16px] bg-[#1c120e] border ${selectedWallet === 'principal' ? 'border-[#C88A4B]/50 bg-[#221510]' : 'border-[#331c13]'} flex items-center justify-between cursor-pointer transition-colors`}
+          >
+            <div className="flex items-center gap-3">
+              <div className={`w-5 h-5 rounded-full border ${selectedWallet === 'principal' ? 'border-[#C88A4B] flex items-center justify-center' : 'border-[#55321F]'}`}>
+                {selectedWallet === 'principal' && <div className="w-2.5 h-2.5 rounded-full bg-[#C88A4B]" />}
+              </div>
+              <div>
+                <h3 className="font-bold text-sm text-foreground font-mono-style">Principal</h3>
+                <p className="text-xs text-[#8E7564] font-mono-style">0xA91F...E82C</p>
+                <p className="text-[11px] text-[#8E7564] font-mono-style">Rede principal Ethereum</p>
+              </div>
+            </div>
+            <button className="text-[#8E7564] hover:text-foreground p-1" aria-label="Opções">
+              <MoreVertical className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        {/* RIGHT: NFT Summary + Wallet */}
-        <div className="w-full lg:w-[405px] shrink-0 space-y-3">
-          <h2 className="text-lg font-bold text-foreground">Seus NFTs</h2>
-          
-          <div className="space-y-3">
-            {/* Header */}
-            <div className="flex justify-between text-sm font-bold border-b border-primary/30 pb-2">
-              <span>NFTs</span>
-              <span>Subtotal</span>
-            </div>
-
-            {/* Items */}
-            {enhancedItems.map(item => (
-              <div key={item.nftId} className="bg-[#241612] p-3 flex items-center gap-3 rounded">
-                <img src={item.nft!.imageUrl} alt={item.nft!.title} className="w-14 h-14 rounded-lg object-cover" width={56} height={56} />
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-sm truncate">{item.nft!.title}</p>
-                  <p className="text-xs text-muted-foreground">ID do token: #{item.nft!.id.replace('nft-', '').padStart(4, '0')}</p>
-                </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">(x {item.quantity})</span>
-                <span className="font-bold text-primary text-sm whitespace-nowrap">{(parseFloat(item.nft!.priceEth) * item.quantity).toFixed(2)} ETH</span>
-              </div>
-            ))}
+        {/* Section 2: Carteira e rede */}
+        <div className="mb-6">
+          <div className="mb-3">
+            <h2 className="font-bold text-foreground font-mono-style text-sm">Carteira e rede</h2>
           </div>
 
-          {/* Promo code */}
-          <div className="space-y-2 pt-4 border-t border-border mt-4">
-            <p className="text-xs text-center text-muted-foreground">Tem um código promocional? Aplique aqui</p>
-            <div className="flex gap-2">
-              <input 
-                type="text" 
-                placeholder="Código promocional" 
-                value={couponInput}
-                onChange={e => setCouponInput(e.target.value)}
-                className="w-full bg-transparent border border-border text-foreground px-3 py-2 text-sm rounded focus:outline-none focus:border-primary"
-              />
-              <Button 
-                variant="outline" 
-                onClick={() => applyCoupon.mutate()} 
-                disabled={applyCoupon.isPending || !couponInput}
-                className="font-mono-style"
-              >
-                Aplicar
-              </Button>
-            </div>
-            {couponError && <p className="text-xs text-destructive text-center">{couponError}</p>}
-          </div>
-
-          {/* Totals */}
-          <div className="space-y-2 text-sm pt-4">
-            <div className="flex justify-between"><span>Subtotal</span><span>{subtotalEth.toFixed(2)} ETH</span></div>
-            <div className="flex justify-between"><span>Desconto do lançamento</span><span>(-) {appliedDiscount.toFixed(2)}</span></div>
-            <div className="flex justify-between"><span>Taxa de rede</span><span>{networkFeeEth.toFixed(3)} ETH</span></div>
-            <p className="text-xs text-primary text-center">Taxa estimada</p>
-            <div className="border-t border-primary/30 pt-3 flex justify-between items-center">
-              <span className="font-bold">Total</span>
-              <span className="font-bold text-primary text-lg">{Math.max(0, totalEth - appliedDiscount).toFixed(3)} ETH</span>
-            </div>
-          </div>
-
-          {/* Wallet Selection */}
-          <div className="space-y-4 pt-4">
-            <h3 className="font-bold text-center">Carteira e rede</h3>
-            <div className="bg-[#241612] p-3 rounded flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full border-2 border-primary" />
-              <div className="flex gap-2">
-                <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">METAMASK</span>
-                <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">WALLETCONNECT</span>
-                <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">COINBASE</span>
-              </div>
-            </div>
-            <label className="flex items-center gap-3 border border-border rounded p-4 cursor-pointer hover:border-primary transition-colors">
-              <input type="radio" name="wallet" value="metamask" checked={selectedWallet === 'metamask'} onChange={() => setSelectedWallet('metamask')} className="accent-primary" />
-              <span className="text-sm">MetaMask</span>
-            </label>
-            <label className="flex items-center gap-3 border border-border rounded p-4 cursor-pointer hover:border-primary transition-colors">
-              <input type="radio" name="wallet" value="coinbase" checked={selectedWallet === 'coinbase'} onChange={() => setSelectedWallet('coinbase')} className="accent-primary" />
-              <span className="text-sm">Coinbase Wallet</span>
-            </label>
-          </div>
-
-          {error && (
-            <div className="p-4 bg-destructive/10 text-destructive text-sm rounded">{error}</div>
-          )}
-
-          <Button
-            className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-mono-style uppercase tracking-wider rounded-lg"
-            onClick={handleCheckout}
-            disabled={checkoutMutation.isPending}
+          {/* WalletConnect */}
+          <div
+            onClick={() => setSelectedNetworkWallet('walletconnect')}
+            className={`p-4 rounded-[16px] bg-[#1c120e] border ${selectedNetworkWallet === 'walletconnect' ? 'border-[#C88A4B]/50 bg-[#221510]' : 'border-[#331c13]'} flex items-center justify-between cursor-pointer transition-colors mb-3`}
           >
-            {checkoutMutation.isPending ? 'Processando...' : 'Confirmar compra'}
-          </Button>
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#140D09] border border-[#3A2218] flex items-center justify-center text-[#CFB28C] font-mono-style font-bold text-xs">
+                W
+              </div>
+              <span className="font-mono-style text-sm text-foreground font-medium">WalletConnect</span>
+            </div>
+            <div className={`w-5 h-5 rounded-full border ${selectedNetworkWallet === 'walletconnect' ? 'border-[#C88A4B] flex items-center justify-center' : 'border-[#55321F]'}`}>
+              {selectedNetworkWallet === 'walletconnect' && <div className="w-2.5 h-2.5 rounded-full bg-[#C88A4B]" />}
+            </div>
+          </div>
+
+          {/* MetaMask */}
+          <div
+            onClick={() => setSelectedNetworkWallet('metamask')}
+            className={`p-4 rounded-[16px] bg-[#1c120e] border ${selectedNetworkWallet === 'metamask' ? 'border-[#C88A4B]/50 bg-[#221510]' : 'border-[#331c13]'} flex items-center justify-between cursor-pointer transition-colors mb-3`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#140D09] border border-[#3A2218] flex items-center justify-center text-[#CFB28C] font-mono-style font-bold text-xs">
+                M
+              </div>
+              <span className="font-mono-style text-sm text-foreground font-medium">MetaMask</span>
+            </div>
+            <div className={`w-5 h-5 rounded-full border ${selectedNetworkWallet === 'metamask' ? 'border-[#C88A4B] flex items-center justify-center' : 'border-[#55321F]'}`}>
+              {selectedNetworkWallet === 'metamask' && <div className="w-2.5 h-2.5 rounded-full bg-[#C88A4B]" />}
+            </div>
+          </div>
+
+          {/* Coinbase Wallet */}
+          <div
+            onClick={() => setSelectedNetworkWallet('coinbase')}
+            className={`p-4 rounded-[16px] bg-[#1c120e] border ${selectedNetworkWallet === 'coinbase' ? 'border-[#C88A4B]/50 bg-[#221510]' : 'border-[#331c13]'} flex items-center justify-between cursor-pointer transition-colors mb-6`}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#140D09] border border-[#3A2218] flex items-center justify-center text-[#CFB28C] font-mono-style font-bold text-xs">
+                <Wallet className="w-4 h-4 text-[#CFB28C]" />
+              </div>
+              <span className="font-mono-style text-sm text-foreground font-medium">Coinbase Wallet</span>
+            </div>
+            <div className={`w-5 h-5 rounded-full border ${selectedNetworkWallet === 'coinbase' ? 'border-[#C88A4B] flex items-center justify-center' : 'border-[#55321F]'}`}>
+              {selectedNetworkWallet === 'coinbase' && <div className="w-2.5 h-2.5 rounded-full bg-[#C88A4B]" />}
+            </div>
+          </div>
+        </div>
+
+        {/* Total Row */}
+        <div className="flex justify-end items-baseline gap-3 mb-8">
+          <span className="font-mono-style text-sm text-foreground font-bold">Total:</span>
+          <span className="font-mono-style text-xl font-bold text-[#C88A4B]">
+            {totalEth.toFixed(3)} ETH
+          </span>
+        </div>
+
+        {error && (
+          <div className="p-4 mb-4 bg-destructive/10 text-destructive text-sm rounded">{error}</div>
+        )}
+
+        {/* CTA Button */}
+        <Button
+          className="w-full h-14 bg-primary text-background hover:bg-primary-dark font-mono-style font-bold uppercase rounded-full text-base tracking-wide"
+          onClick={handleCheckout}
+          disabled={checkoutMutation.isPending}
+        >
+          {checkoutMutation.isPending ? 'Processando...' : 'Confirmar compra'}
+        </Button>
+      </div>
+
+      {/* DESKTOP VIEW (100% untouched) */}
+      <div className="hidden md:block">
+        {/* Breadcrumb */}
+        <div className="text-muted-foreground text-sm uppercase mb-8 font-mono-style">
+          <Link to="/" className="hover:text-foreground">Início</Link> /
+          <Link to="/" className="hover:text-foreground"> Mercado</Link> / Pagamento
+        </div>
+
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* LEFT: Collector Profile Form */}
+          <div className="flex-1 space-y-3">
+            <h2 className="text-lg font-bold text-foreground">Perfil do colecionador</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputField label="Nome de exibição" required value={form.displayName} onChange={v => setForm(f => ({...f, displayName: v}))} />
+              <InputField label="Nome de usuário" required value={form.username} onChange={v => setForm(f => ({...f, username: v}))} />
+              <SelectField label="Rede" required options={['Selecione uma rede', 'Ethereum', 'Polygon', 'Solana']} />
+              <InputField label="Nome do perfil" required value={form.profileName} onChange={v => setForm(f => ({...f, profileName: v}))} />
+              <InputField label="Endereço da carteira" required placeholder="Endereço 0x da carteira" value={form.walletAddress} onChange={v => setForm(f => ({...f, walletAddress: v}))} />
+              <InputField label="ENS ou carteira secundária (opcional)" placeholder="ENS ou carteira secundária (opcional)" value={form.secondaryWallet} onChange={v => setForm(f => ({...f, secondaryWallet: v}))} />
+              <SelectField label="Tipo de carteira" required options={['Selecione uma carteira', 'MetaMask', 'Coinbase Wallet', 'WalletConnect']} />
+              <InputField label="Código de indicação" required value={form.referralCode} onChange={v => setForm(f => ({...f, referralCode: v}))} />
+              <InputField label="E-mail" required type="email" value={form.email} onChange={v => setForm(f => ({...f, email: v}))} />
+              <div className="flex gap-2 items-end">
+                <div className="w-20">
+                  <label className="block text-xs text-foreground mb-2">Nome ENS <span className="text-primary">*</span></label>
+                  <select className="w-full bg-transparent border border-border text-foreground px-2 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary">
+                    <option>.eth</option>
+                  </select>
+                </div>
+                <div className="flex-1">
+                  <input className="w-full bg-transparent border border-border text-foreground px-3 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary" value={form.ensName} onChange={e => setForm(f => ({...f, ensName: e.target.value}))} />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mt-4">
+              <div className={`w-4 h-4 rounded-full border-2 ${form.useOtherWallet ? 'border-primary bg-primary' : 'border-primary'} cursor-pointer flex items-center justify-center`} onClick={() => setForm(f => ({...f, useOtherWallet: !f.useOtherWallet}))}>
+                {form.useOtherWallet && <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+              </div>
+              <span className="text-sm">Usar outra carteira?</span>
+            </div>
+
+            <div className="mt-6">
+              <label className="block text-sm text-foreground mb-2">Observação do colecionador (opcional)</label>
+              <textarea 
+                className="w-full max-w-[350px] bg-transparent border border-border text-foreground px-3 py-3 text-sm rounded-sm focus:outline-none focus:border-primary h-36 resize-none"
+                value={form.notes}
+                onChange={e => setForm(f => ({...f, notes: e.target.value}))}
+              />
+            </div>
+          </div>
+
+          {/* RIGHT: NFT Summary + Wallet */}
+          <div className="w-full lg:w-[405px] shrink-0 space-y-3">
+            <h2 className="text-lg font-bold text-foreground">Seus NFTs</h2>
+            
+            <div className="space-y-3">
+              {/* Header */}
+              <div className="flex justify-between text-sm font-bold border-b border-primary/30 pb-2">
+                <span>NFTs</span>
+                <span>Subtotal</span>
+              </div>
+
+              {/* Items */}
+              {enhancedItems.map(item => (
+                <div key={item.nftId} className="bg-[#241612] p-3 flex items-center gap-3 rounded">
+                  <img src={item.nft!.imageUrl} alt={item.nft!.title} className="w-14 h-14 rounded-lg object-cover" width={56} height={56} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm truncate">{item.nft!.title}</p>
+                    <p className="text-xs text-muted-foreground">ID do token: #{item.nft!.id.replace('nft-', '').padStart(4, '0')}</p>
+                  </div>
+                  <span className="text-xs text-muted-foreground whitespace-nowrap">(x {item.quantity})</span>
+                  <span className="font-bold text-primary text-sm whitespace-nowrap">{(parseFloat(item.nft!.priceEth) * item.quantity).toFixed(2)} ETH</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Promo code */}
+            <div className="space-y-2 pt-4 border-t border-border mt-4">
+              <p className="text-xs text-center text-muted-foreground">Tem um código promocional? Aplique aqui</p>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Código promocional" 
+                  value={couponInput}
+                  onChange={e => setCouponInput(e.target.value)}
+                  className="w-full bg-transparent border border-border text-foreground px-3 py-2 text-sm rounded focus:outline-none focus:border-primary"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => applyCoupon.mutate()} 
+                  disabled={applyCoupon.isPending || !couponInput}
+                  className="font-mono-style"
+                >
+                  Aplicar
+                </Button>
+              </div>
+              {couponError && <p className="text-xs text-destructive text-center">{couponError}</p>}
+            </div>
+
+            {/* Totals */}
+            <div className="space-y-2 text-sm pt-4">
+              <div className="flex justify-between"><span>Subtotal</span><span>{subtotalEth.toFixed(2)} ETH</span></div>
+              <div className="flex justify-between"><span>Desconto do lançamento</span><span>(-) {appliedDiscount.toFixed(2)}</span></div>
+              <div className="flex justify-between"><span>Taxa de rede</span><span>{networkFeeEth.toFixed(3)} ETH</span></div>
+              <p className="text-xs text-primary text-center">Taxa estimada</p>
+              <div className="border-t border-primary/30 pt-3 flex justify-between items-center">
+                <span className="font-bold">Total</span>
+                <span className="font-bold text-primary text-lg">{Math.max(0, totalEth - appliedDiscount).toFixed(3)} ETH</span>
+              </div>
+            </div>
+
+            {/* Wallet Selection */}
+            <div className="space-y-4 pt-4">
+              <h3 className="font-bold text-center">Carteira e rede</h3>
+              <div className="bg-[#241612] p-3 rounded flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full border-2 border-primary" />
+                <div className="flex gap-2">
+                  <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">METAMASK</span>
+                  <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">WALLETCONNECT</span>
+                  <span className="text-[10px] border border-border px-2 py-0.5 font-mono-style text-muted-foreground">COINBASE</span>
+                </div>
+              </div>
+              <label className="flex items-center gap-3 border border-border rounded p-4 cursor-pointer hover:border-primary transition-colors">
+                <input type="radio" name="wallet" value="metamask" checked={selectedWallet === 'metamask'} onChange={() => setSelectedWallet('metamask')} className="accent-primary" />
+                <span className="text-sm">MetaMask</span>
+              </label>
+              <label className="flex items-center gap-3 border border-border rounded p-4 cursor-pointer hover:border-primary transition-colors">
+                <input type="radio" name="wallet" value="coinbase" checked={selectedWallet === 'coinbase'} onChange={() => setSelectedWallet('coinbase')} className="accent-primary" />
+                <span className="text-sm">Coinbase Wallet</span>
+              </label>
+            </div>
+
+            {error && (
+              <div className="p-4 bg-destructive/10 text-destructive text-sm rounded">{error}</div>
+            )}
+
+            <Button
+              className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90 font-mono-style uppercase tracking-wider rounded-lg"
+              onClick={handleCheckout}
+              disabled={checkoutMutation.isPending}
+            >
+              {checkoutMutation.isPending ? 'Processando...' : 'Confirmar compra'}
+            </Button>
+          </div>
         </div>
       </div>
 

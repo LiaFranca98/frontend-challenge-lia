@@ -15,7 +15,6 @@ try {
   if (saved) {
     const parsed = JSON.parse(saved);
     db.users = parsed.users || [];
-    db.nfts = parsed.nfts || [];
     db.orders = parsed.orders || [];
     db.favorites = new Map(parsed.favorites || []);
     db.carts = new Map(parsed.carts || []);

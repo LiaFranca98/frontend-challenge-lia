@@ -23,12 +23,14 @@ test.describe('Checkpoint 1: Catálogo, Detalhe e Carrinho', () => {
       });
 
       // Validar persistência na URL e paginação
-      const filterInput = page.locator('input[name="q"]');
-      if (await filterInput.isVisible()) {
-        await page.locator('form').getByPlaceholder('Buscar colecionáveis...').fill('cosmic');
+      const desktopFilterInput = page.locator('form').getByPlaceholder('Buscar colecionáveis...');
+      const mobileFilterInput = page.locator('form').getByPlaceholder('Explorar coleções');
+      
+      if (await desktopFilterInput.isVisible()) {
+        await desktopFilterInput.fill('Emerald');
         await page.locator('form').getByRole('button', { name: 'IR' }).click();
-        await page.waitForURL('**/?q=cosmic*');
-        await page.waitForSelector('text=Cosmic Bloom', { state: 'visible' });
+        await page.waitForURL('**/?q=Emerald*');
+        await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
         
         await page.screenshot({ 
           path: `/Users/lia/.gemini/antigravity-ide/brain/a948781e-a012-4571-8496-0bcf1d7bb847/scratch/catalog-filtered-${size.name}.png`,
@@ -38,6 +40,21 @@ test.describe('Checkpoint 1: Catálogo, Detalhe e Carrinho', () => {
         // Limpar filtros para voltar
         await page.getByRole('button', { name: 'Limpar Filtros' }).click();
         await page.waitForURL('**/?page=1');
+      } else if (await mobileFilterInput.isVisible()) {
+        // Mobile search: just fill and submit (press Enter)
+        await mobileFilterInput.fill('Emerald');
+        await mobileFilterInput.press('Enter');
+        await page.waitForURL('**/?q=Emerald*');
+        await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
+        
+        await page.screenshot({ 
+          path: `/Users/lia/.gemini/antigravity-ide/brain/a948781e-a012-4571-8496-0bcf1d7bb847/scratch/catalog-filtered-${size.name}.png`,
+          fullPage: true 
+        });
+        
+        // Navigate back to clear
+        await page.goto('/');
+        await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
       }
 
       // 2. Navegar para detalhe

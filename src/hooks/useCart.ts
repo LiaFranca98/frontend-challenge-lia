@@ -44,6 +44,48 @@ export function useAddToCart() {
   });
 }
 
+export function useRemoveFromCart() {
+  const queryClient = useQueryClient();
+  const sessionId = getSessionId();
+
+  return useMutation({
+    mutationFn: async (nftId: string) => {
+      const { data } = await api.delete<CartItem[]>(`/cart/${nftId}`, {
+        headers: { Authorization: sessionId },
+      });
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart', sessionId] });
+    },
+  });
+}
+
+export function useUpdateCartQuantity() {
+  const queryClient = useQueryClient();
+  const sessionId = getSessionId();
+
+  return useMutation({
+    mutationFn: async ({ nftId, quantity }: { nftId: string; quantity: number }) => {
+      if (quantity <= 0) {
+        const { data } = await api.delete<CartItem[]>(`/cart/${nftId}`, {
+          headers: { Authorization: sessionId },
+        });
+        return data;
+      }
+      const { data } = await api.patch<CartItem[]>(
+        `/cart/${nftId}`,
+        { quantity },
+        { headers: { Authorization: sessionId } }
+      );
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['cart', sessionId] });
+    },
+  });
+}
+
 import { create } from 'zustand';
 
 interface CartState {

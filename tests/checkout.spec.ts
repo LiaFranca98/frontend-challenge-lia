@@ -10,7 +10,7 @@ test.describe('Checkout Flow', () => {
     // Go to detail page and add to cart
     await page.getByRole('link', { name: /Emerald Ape #042/i }).first().click();
     await page.waitForURL('**/nfts/*');
-    await page.getByRole('button', { name: 'Comprar' }).click();
+    await page.getByRole('button', { name: /Comprar/i }).first().click();
 
     // Verify cart count updated (Header)
     await expect(page.locator('header').getByText('1')).toBeVisible();
@@ -19,12 +19,12 @@ test.describe('Checkout Flow', () => {
     await page.locator('header').locator('button').filter({ hasText: '1' }).click();
 
     // Verify drawer is open and item is there
-    await expect(page.getByRole('heading', { name: 'Seu Carrinho' })).toBeVisible();
+    await expect(page.getByText('Carrinho de NFTs')).toBeVisible();
     await expect(page.locator('h3', { hasText: 'Emerald Ape #042' }).first()).toBeVisible();
 
     // Go to checkout
 
-    await page.locator('text=Finalizar Compra').click();
+    await page.getByText('Conectar e finalizar').click();
     await page.waitForURL('**/checkout');
 
     // Verify checkout page

@@ -2,6 +2,10 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+@import "@fontsource/roboto-mono/400.css";
+@import "@fontsource/roboto-mono/500.css";
+@import "@fontsource/roboto-mono/600.css";
+@import "@fontsource/roboto-mono/700.css";
 @import "@fontsource/space-mono";
 
 @plugin "tailwindcss-animate";
@@ -10,7 +14,7 @@
 
 @theme inline {
   --font-sans: 'Geist Variable', system-ui, sans-serif;
-  --font-mono: 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  --font-mono: 'Roboto Mono', 'Space Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   
   --color-background: #0D0B0A;
   --color-foreground: #F5F1EB;
@@ -59,5 +63,12 @@
   }
   .font-mono-style {
     @apply font-mono tracking-wide;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }

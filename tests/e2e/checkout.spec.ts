@@ -18,7 +18,7 @@ test.describe('Authenticated Checkout Flow', () => {
     
     // 3. Open Cart and Proceed to Checkout
     await page.locator('header').locator('button').filter({ hasText: '1' }).click();
-    await page.locator('text=Finalizar Compra').click();
+    await page.getByText('Conectar e finalizar').click();
     
     // 4. In Checkout, verify UI
     await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible();

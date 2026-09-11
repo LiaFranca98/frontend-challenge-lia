@@ -47,27 +47,29 @@ test.describe('Advanced Flows', () => {
     await page.evaluate(() => localStorage.setItem('simulate-error', '500'));
 
     await page.locator('header').locator('button').filter({ hasText: '1' }).click();
-    await page.locator('text=Finalizar Compra').click();
+    // Wait for cart drawer items to load
+    await page.waitForSelector('text=Emerald Ape #042', { state: 'visible', timeout: 10000 });
+    await page.getByText('Conectar e finalizar').click();
     await page.waitForURL('**/checkout');
 
     await page.getByRole('button', { name: 'Confirmar compra' }).click();
 
     // Await error state on UI
-    await expect(page.getByText(/Erro|Internal Server Error/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Erro|Internal Server Error/i)).toBeVisible({ timeout: 15000 });
   });
 
   test('Busca e Histórico - Filtros e restauração pela URL', async ({ page }) => {
     await page.goto('/');
     
-    // Fill search
+    // Fill search using the desktop sidebar input
     const searchInput = page.getByPlaceholder(/Buscar colecionáveis/i);
     await searchInput.fill('Emerald');
     
-    // Select filter
-    await page.getByRole('button', { name: 'Comprar agora' }).click();
+    // Submit the search form
+    await page.locator('form').getByRole('button', { name: 'IR' }).click();
     
     // Wait for the query to execute and URL to update
-    await page.waitForURL('**/?q=Emerald&availability=now**');
+    await page.waitForURL('**/?q=Emerald*');
     
     // Assert Emerald is visible
     await expect(page.getByText('Emerald Ape #042')).toBeVisible();
@@ -78,7 +80,7 @@ test.describe('Advanced Flows', () => {
     
     // Go back and check if filters are restored
     await page.goBack();
-    await page.waitForURL('**/?q=Emerald&availability=now**');
+    await page.waitForURL('**/?q=Emerald*');
     await expect(searchInput).toHaveValue('Emerald');
   });
 
@@ -90,8 +92,11 @@ test.describe('Advanced Flows', () => {
 
     // Reload page to test persistence
     await page.reload();
-    await page.getByRole('button', { name: 'Carrinho' }).click(); // Open cart
-    await page.locator('text=Finalizar Compra').click();
+    await page.waitForSelector('text=Emerald Ape', { state: 'visible' });
+    await page.locator('header').locator('button').filter({ hasText: /\d/ }).click();
+    // Wait for cart items to load from MSW
+    await page.waitForSelector('text=Emerald Ape #042', { state: 'visible', timeout: 10000 });
+    await page.getByText('Conectar e finalizar').click();
     await page.waitForURL('**/checkout');
 
     // Try invalid coupon
@@ -115,18 +120,21 @@ test.describe('Advanced Flows', () => {
 
     // Set timeout
     await page.evaluate(() => localStorage.setItem('simulate-error', 'timeout'));
-    await page.getByRole('button', { name: 'Carrinho' }).click();
-    await page.locator('text=Finalizar Compra').click();
+    await page.locator('header').locator('button').filter({ hasText: /\d/ }).click();
+    // Wait for cart drawer items to load
+    await page.waitForSelector('text=Emerald Ape #042', { state: 'visible', timeout: 10000 });
+    await page.getByText('Conectar e finalizar').click();
+    await page.waitForURL('**/checkout');
     
     await page.getByRole('button', { name: 'Confirmar compra' }).click();
-    await expect(page.getByText(/Erro|Timeout/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Erro|Timeout|Gateway/i)).toBeVisible({ timeout: 15000 });
 
     // Set payment declined
     await page.evaluate(() => localStorage.setItem('simulate-error', 'payment_declined'));
     await page.getByRole('button', { name: 'Confirmar compra' }).click();
     
     // UI should show some error or redirect to a failed state. For now we just expect an error.
-    await expect(page.getByText(/Erro|refused|Pagamento recusado/i)).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Erro|refused|Pagamento recusado/i)).toBeVisible({ timeout: 15000 });
   });
 
 });

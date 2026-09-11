@@ -3,7 +3,6 @@ import type { NFT } from '@/domain/types';
 import { Badge } from '@/components/ui/badge';
 import { Heart, ShoppingCart, Search } from 'lucide-react';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useAuth } from '@/hooks/useAuth';
 import { useAddToCart } from '@/hooks/useCart';
 
 interface NFTCardProps {
@@ -11,7 +10,6 @@ interface NFTCardProps {
 }
 
 export function NFTCard({ nft }: NFTCardProps) {
-  const { user } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const { mutate: addToCart } = useAddToCart();
   const isFav = isFavorite(nft.id);
@@ -19,7 +17,7 @@ export function NFTCard({ nft }: NFTCardProps) {
 
   return (
     <div className="group transition-all">
-      <div className="relative aspect-square overflow-hidden bg-muted rounded-[12px] mb-4">
+      <div className="relative aspect-square overflow-hidden bg-muted rounded-[16px] md:rounded-[12px] mb-3 md:mb-4">
         <Link to={'/nfts/$id'} params={{ id: nft.id }} className="block w-full h-full">
           <img 
             src={nft.imageUrl} 
@@ -31,10 +29,34 @@ export function NFTCard({ nft }: NFTCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300 pointer-events-none" />
         </Link>
+
+        {/* Mobile Rare Badge (Figma P-3) */}
+        {nft.id === 'nft-3' && (
+          <div className="absolute top-0 left-0 bg-primary text-background font-mono-style font-bold text-[10px] md:text-xs px-2.5 py-1 rounded-br-lg rounded-tl-[16px] uppercase tracking-wider z-10 pointer-events-none">
+            RARO
+          </div>
+        )}
+
+        {/* Mobile Top-Right Favorite Button (Figma style) */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(nft.id);
+          }}
+          aria-label={`Favoritar ${nft.title}`}
+          className={`md:hidden absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all border z-10 ${
+            isFav 
+              ? 'bg-[#2F1D15] text-primary border-[#55321F]' 
+              : 'bg-[#2F1D15]/80 text-[#CFB28C] border-[#55321F]'
+          }`}
+        >
+          <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-[#D28A4C] text-[#D28A4C]' : 'stroke-[#CFB28C]'}`} />
+        </button>
         
-        {/* Hover action icons - Figma style */}
+        {/* Desktop Hover action icons - Figma style */}
         {isAvailable && (
-          <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-auto">
+          <div className="hidden md:flex absolute bottom-3 right-3 gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10 pointer-events-auto">
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -48,7 +70,7 @@ export function NFTCard({ nft }: NFTCardProps) {
             <button
               onClick={(e) => {
                 e.preventDefault();
-                if (user) toggleFavorite(nft.id);
+                toggleFavorite(nft.id);
               }}
               aria-label={`Favoritar ${nft.title}`}
               className={`w-8 h-8 rounded flex items-center justify-center transition-colors border ${
@@ -80,10 +102,10 @@ export function NFTCard({ nft }: NFTCardProps) {
       
       <div>
         <Link to={'/nfts/$id'} params={{ id: nft.id }} className="block">
-          <h3 className="font-mono-style font-bold text-foreground text-sm mb-1 group-hover:text-primary transition-colors line-clamp-1">
+          <h3 className="font-mono-style font-medium md:font-bold text-foreground text-xs sm:text-sm mb-1 group-hover:text-primary transition-colors line-clamp-1">
             {nft.title}
           </h3>
-          <span className="font-mono-style font-bold text-primary text-sm">{nft.priceEth} ETH</span>
+          <span className="font-mono-style font-bold text-primary text-xs sm:text-sm">{nft.priceEth} ETH</span>
         </Link>
       </div>
     </div>
