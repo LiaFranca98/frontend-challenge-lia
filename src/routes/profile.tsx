@@ -1,153 +1,207 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useAuth } from '@/hooks/useAuth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useState, useEffect } from 'react';
-import { Wallet, Plus, Trash2 } from 'lucide-react';
+import { Eye, EyeOff, User, Wallet, Activity, Heart, Tag, Download, HelpCircle, LogOut } from 'lucide-react';
 
 export const Route = createFileRoute('/profile')({
-
   component: ProfilePage,
 });
 
+const menuItems = [
+  { icon: User, label: 'Dados do perfil', id: 'profile' },
+  { icon: Wallet, label: 'Carteiras', id: 'wallets' },
+  { icon: Activity, label: 'Atividade', id: 'activity' },
+  { icon: Heart, label: 'Lista de interesse', id: 'wishlist' },
+  { icon: Tag, label: 'Ofertas', id: 'offers' },
+  { icon: Download, label: 'Arquivos baixados', id: 'downloads' },
+  { icon: HelpCircle, label: 'Suporte', id: 'support' },
+];
+
 function ProfilePage() {
   const { user, isLoading, logout, updateProfile } = useAuth();
+  const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState('profile');
   
-  const [name, setName] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
-  const [newWalletAddress, setNewWalletAddress] = useState('');
+  const [ensName, setEnsName] = useState('');
+  const [walletAlias, setWalletAlias] = useState('');
+  
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   useEffect(() => {
     if (user) {
-      setName(user.name);
+      setDisplayName(user.name);
       setEmail(user.email);
     }
   }, [user]);
 
   if (isLoading) {
-    return <div className="container mx-auto px-4 py-16 animate-pulse bg-muted h-96 rounded-2xl"></div>;
+    return <div className="container mx-auto px-4 py-16 animate-pulse bg-muted h-96 rounded-2xl" />;
   }
 
   if (!user) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
         <h1 className="text-2xl font-bold mb-4">Acesso Negado</h1>
-        <p className="mb-8">Você precisa fazer login para ver seu perfil.</p>
+        <p className="mb-8 text-muted-foreground">Você precisa fazer login para ver seu perfil.</p>
       </div>
     );
   }
 
-  const handleUpdateProfile = async (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    await updateProfile({ name, email });
-  };
-
-  const handleAddWallet = async () => {
-    if (!newWalletAddress) return;
-    
-    const newWallet = {
-      id: `wallet-${Date.now()}`,
-      address: newWalletAddress,
-      network: 'Ethereum',
-      isPrimary: user.wallets.length === 0
-    };
-    
-    await updateProfile({
-      wallets: [...user.wallets, newWallet]
-    });
-    setNewWalletAddress('');
-  };
-
-  const handleRemoveWallet = async (walletId: string) => {
-    await updateProfile({
-      wallets: user.wallets.filter((w: any) => w.id !== walletId)
-    });
+    await updateProfile({ name: displayName, email });
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 max-w-4xl">
-      <h1 className="text-3xl font-bold font-sans text-foreground mb-12">Meu Perfil</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-        <div className="md:col-span-1 space-y-8">
-          <div className="bg-card border border-border p-6 rounded-2xl">
-            <div className="w-24 h-24 bg-muted rounded-full mx-auto mb-4 overflow-hidden">
-              {user.avatarUrl ? (
-                <img src={user.avatarUrl} alt={user.name} className="w-full h-full object-cover" />
-              ) : (
-                <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary text-3xl font-bold">
-                  {user.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-            </div>
-            <h2 className="text-xl font-bold text-center">{user.name}</h2>
-            <p className="text-muted-foreground text-center text-sm mb-6">{user.email}</p>
-            
-            <Button variant="outline" className="w-full mb-2" onClick={() => logout()}>
-              Sair da Conta
-            </Button>
+    <div className="container mx-auto px-4 md:px-8 py-10">
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Sidebar */}
+        <aside className="w-full lg:w-[280px] shrink-0">
+          <div className="bg-[#241612] rounded-xl p-6">
+            <h2 className="font-bold text-lg font-sans text-foreground mb-6">Meu perfil</h2>
+            <nav className="space-y-1" aria-label="Menu do perfil">
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = activeSection === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setActiveSection(item.id)}
+                    className={`w-full flex items-center gap-3 px-4 py-3 text-sm rounded transition-colors text-left ${
+                      isActive
+                        ? 'text-primary border-l-2 border-primary bg-primary/5'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {item.label}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => { logout(); navigate({ to: '/' }); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm rounded transition-colors text-left text-primary hover:bg-primary/5"
+              >
+                <LogOut className="w-4 h-4" />
+                Sair
+              </button>
+            </nav>
           </div>
-        </div>
+        </aside>
 
-        <div className="md:col-span-2 space-y-12">
-          {/* Personal Info */}
-          <section className="bg-card border border-border p-8 rounded-2xl">
-            <h3 className="text-xl font-bold mb-6">Informações Pessoais</h3>
-            <form onSubmit={handleUpdateProfile} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-              </div>
-              <Button type="submit">Salvar Alterações</Button>
-            </form>
-          </section>
-
-          {/* Wallets */}
-          <section className="bg-card border border-border p-8 rounded-2xl">
-            <h3 className="text-xl font-bold mb-6">Carteiras Conectadas</h3>
-            
-            <div className="space-y-4 mb-8">
-              {user.wallets.map((wallet: any) => (
-                <div key={wallet.id} className="flex items-center justify-between p-4 border border-border rounded-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                      <Wallet className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="font-mono-style text-sm">{wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}</p>
-                      <p className="text-xs text-muted-foreground">{wallet.network} {wallet.isPrimary && '• Principal'}</p>
-                    </div>
-                  </div>
-                  <Button variant="ghost" size="icon" onClick={() => handleRemoveWallet(wallet.id)} className="text-destructive hover:text-destructive hover:bg-destructive/10">
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+        {/* Main Content */}
+        <main className="flex-1">
+          <h1 className="text-xl font-bold font-sans text-foreground mb-8">Perfil do colecionador</h1>
+          
+          <form onSubmit={handleSave} className="space-y-8">
+            {/* Profile Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ProfileInput label="Nome de exibição" required value={displayName} onChange={setDisplayName} />
+              <ProfileInput label="Nome de usuário" required value={username} onChange={setUsername} />
+              <ProfileInput label="E-mail" required type="email" value={email} onChange={setEmail} />
+              <div className="flex gap-2 items-end">
+                <div className="w-20">
+                  <label className="block text-sm text-foreground mb-2">Nome ENS <span className="text-primary">*</span></label>
+                  <select className="w-full bg-transparent border border-border text-foreground px-2 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary">
+                    <option>.eth</option>
+                  </select>
                 </div>
-              ))}
-              
-              {user.wallets.length === 0 && (
-                <p className="text-sm text-muted-foreground py-4 text-center">Nenhuma carteira conectada.</p>
-              )}
+                <div className="flex-1">
+                  <input 
+                    className="w-full bg-transparent border border-border text-foreground px-3 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary"
+                    value={ensName}
+                    onChange={e => setEnsName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <ProfileInput label="Apelido da carteira" required value={walletAlias} onChange={setWalletAlias} />
             </div>
 
-            <div className="flex gap-2">
-              <Input 
-                placeholder="0x..." 
-                value={newWalletAddress} 
-                onChange={(e) => setNewWalletAddress(e.target.value)}
-                className="font-mono-style"
-              />
-              <Button onClick={handleAddWallet} disabled={!newWalletAddress}>
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar
-              </Button>
+            {/* Avatar Section */}
+            <div className="space-y-3">
+              <label className="block text-sm text-foreground font-bold">Avatar</label>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center text-2xl">
+                  😊
+                </div>
+                <button type="button" className="bg-primary text-primary-foreground px-4 py-2 text-sm rounded hover:bg-primary/90 transition-colors font-bold">
+                  Alterar
+                </button>
+                <button type="button" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+                  Remover
+                </button>
+              </div>
             </div>
-          </section>
-        </div>
+
+            {/* Change Password */}
+            <div className="space-y-4 pt-4">
+              <h3 className="font-bold text-foreground">Alterar senha</h3>
+              <PasswordInput label="Senha atual" value={currentPassword} onChange={setCurrentPassword} show={showCurrentPw} onToggle={() => setShowCurrentPw(!showCurrentPw)} />
+              <PasswordInput label="Nova senha" value={newPassword} onChange={setNewPassword} show={showNewPw} onToggle={() => setShowNewPw(!showNewPw)} />
+              <PasswordInput label="Confirmar nova senha" value={confirmPassword} onChange={setConfirmPassword} show={showConfirmPw} onToggle={() => setShowConfirmPw(!showConfirmPw)} />
+            </div>
+
+            <button
+              type="submit"
+              className="bg-primary text-primary-foreground font-bold px-8 py-3 rounded hover:bg-primary/90 transition-colors text-sm"
+            >
+              Salvar
+            </button>
+          </form>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function ProfileInput({ label, required, type = 'text', value, onChange }: {
+  label: string; required?: boolean; type?: string; value: string; onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <label className="block text-sm text-foreground mb-2">
+        {label}{required && <span className="text-primary">*</span>}
+      </label>
+      <input
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        className="w-full bg-transparent border border-border text-foreground px-3 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary"
+      />
+    </div>
+  );
+}
+
+function PasswordInput({ label, value, onChange, show, onToggle }: {
+  label: string; value: string; onChange: (v: string) => void; show: boolean; onToggle: () => void;
+}) {
+  return (
+    <div className="max-w-md">
+      <label className="block text-sm text-foreground mb-2">{label}</label>
+      <div className="relative">
+        <input
+          type={show ? 'text' : 'password'}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full bg-transparent border border-border text-foreground px-3 py-2.5 text-sm rounded-sm focus:outline-none focus:border-primary pr-10"
+        />
+        <button
+          type="button"
+          onClick={onToggle}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          aria-label={show ? 'Ocultar senha' : 'Mostrar senha'}
+        >
+          {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+        </button>
       </div>
     </div>
   );

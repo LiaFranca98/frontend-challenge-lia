@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Minus, Plus } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
+import { useFavorites } from '@/hooks/useFavorites';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Route = createFileRoute('/nfts/$id')({
   component: NFTDetailPage,
@@ -17,6 +19,9 @@ function NFTDetailPage() {
   const { data: nft, isLoading, isError } = useNFT(id);
   const { mutate: addToCart, isPending: isAdding } = useAddToCart();
   const [quantity, setQuantity] = useState(1);
+  const { user } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const isFav = nft ? isFavorite(nft.id) : false;
 
   if (isLoading) {
     return (
@@ -63,7 +68,7 @@ function NFTDetailPage() {
           <div className="hidden sm:flex flex-col gap-4 w-24 shrink-0">
             {/* Thumbnails placeholder */}
             {[1, 2, 3, 4].map(i => (
-              <img key={i} src={nft.imageUrl} alt="Thumb" className="w-full aspect-square object-cover rounded-xl border border-border/50" />
+              <img key={i} src={nft.imageUrl} alt="Thumb" className="w-full aspect-square object-cover rounded-xl border border-border/50" width={100} height={100} loading="lazy" />
             ))}
           </div>
           <div className="relative flex-1 aspect-square rounded-[40px] overflow-hidden bg-muted">
@@ -140,8 +145,18 @@ function NFTDetailPage() {
             >
               {isAdding ? 'Adicionando...' : isAvailable ? 'Comprar' : 'Esgotado'}
             </Button>
-            <Button variant="outline" className="flex-1 bg-transparent border-primary text-primary hover:bg-primary/10 hover:text-primary font-mono-style uppercase h-12 tracking-wide">
-              Favoritar
+            <Button 
+              variant="outline" 
+              className={`flex-1 font-mono-style uppercase h-12 tracking-wide transition-colors ${
+                isFav 
+                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90' 
+                  : 'bg-transparent border-primary text-primary hover:bg-primary/10 hover:text-primary'
+              }`}
+              onClick={() => {
+                if (user) toggleFavorite(nft.id);
+              }}
+            >
+              {isFav ? 'Favoritado' : 'Favoritar'}
             </Button>
           </div>
 
@@ -190,43 +205,30 @@ function NFTDetailPage() {
       
       <div className="mt-24">
         <h3 className="font-bold text-primary font-mono-style uppercase mb-8 border-b border-border/50 pb-4">Mais desta coleção</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 gap-y-10">
-          <div className="group transition-all">
-            <div className="block relative aspect-square overflow-hidden bg-muted rounded-[24px] mb-4">
-              <img src="/nfts/nft-2.png" alt="Cosmic Bloom" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div>
-              <h3 className="font-mono-style font-bold text-foreground text-sm mb-1 line-clamp-1">Cosmic Bloom #118</h3>
-              <span className="font-mono-style font-bold text-primary text-sm">1.29 ETH</span>
-            </div>
+        <div className="overflow-x-auto pb-4 -mx-2">
+          <div className="flex gap-6 px-2 min-w-max">
+            {[
+              { img: '/nfts/nft-4.png', title: 'Cosmic Bloom #118', price: '1.29 ETH', id: 'nft-4' },
+              { img: '/nfts/nft-5.png', title: 'Violet Nomad #314', price: '1.39 ETH', id: 'nft-5' },
+              { img: '/nfts/nft-6.png', title: 'Ivory Baron #088', price: '1.79 ETH', id: 'nft-6' },
+              { img: '/nfts/nft-1.png', title: 'Golden Beat #207', price: '0.99 ETH', id: 'nft-7' },
+              { img: '/nfts/nft-1.png', title: 'Golden Signal #160', price: '0.39 ETH', id: 'nft-8' },
+            ].map((item) => (
+              <Link key={item.id} to="/nfts/$id" params={{ id: item.id }} className="group transition-all w-[200px] shrink-0">
+                <div className="relative aspect-square overflow-hidden bg-muted rounded-[24px] mb-4">
+                  <img src={item.img} alt={item.title} className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" loading="lazy" width={200} height={200} />
+                </div>
+                <h4 className="font-mono-style font-bold text-foreground text-sm mb-1 line-clamp-1">{item.title}</h4>
+                <span className="font-mono-style font-bold text-primary text-sm">{item.price}</span>
+              </Link>
+            ))}
           </div>
-          <div className="group transition-all">
-            <div className="block relative aspect-square overflow-hidden bg-muted rounded-[24px] mb-4">
-              <img src="/nfts/nft-3.png" alt="Violet Nomad" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div>
-              <h3 className="font-mono-style font-bold text-foreground text-sm mb-1 line-clamp-1">Violet Nomad #314</h3>
-              <span className="font-mono-style font-bold text-primary text-sm">1.39 ETH</span>
-            </div>
-          </div>
-          <div className="group transition-all">
-            <div className="block relative aspect-square overflow-hidden bg-muted rounded-[24px] mb-4">
-              <img src="/nfts/nft-4.png" alt="Ivory Baron" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div>
-              <h3 className="font-mono-style font-bold text-foreground text-sm mb-1 line-clamp-1">Ivory Baron #088</h3>
-              <span className="font-mono-style font-bold text-primary text-sm">1.79 ETH</span>
-            </div>
-          </div>
-          <div className="group transition-all">
-            <div className="block relative aspect-square overflow-hidden bg-muted rounded-[24px] mb-4">
-              <img src="/nfts/nft-5.png" alt="Golden Beat" className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105" />
-            </div>
-            <div>
-              <h3 className="font-mono-style font-bold text-foreground text-sm mb-1 line-clamp-1">Golden Beat #207</h3>
-              <span className="font-mono-style font-bold text-primary text-sm">0.99 ETH</span>
-            </div>
-          </div>
+        </div>
+        {/* Dots */}
+        <div className="flex justify-center gap-2 mt-4">
+          <div className="w-3 h-3 rounded-full bg-primary" />
+          <div className="w-3 h-3 rounded-full bg-border" />
+          <div className="w-3 h-3 rounded-full bg-border" />
         </div>
       </div>
       

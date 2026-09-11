@@ -28,13 +28,14 @@ test.describe('Checkout Flow', () => {
     await page.waitForURL('**/checkout');
 
     // Verify checkout page
-    await expect(page.getByRole('heading', { name: 'Checkout' })).toBeVisible();
+    // Verify checkout page
+    await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible();
     await expect(page.getByText('Emerald Ape')).toBeVisible();
 
     // Confirm purchase
-    await page.getByRole('button', { name: 'Confirmar Compra' }).click();
+    await page.getByRole('button', { name: 'Confirmar compra' }).click();
 
     // Wait for success screen
-    await expect(page.getByText('Compra Confirmada!')).toBeVisible();
+    await expect(page.getByText('Seus NFTs agora estão na sua carteira')).toBeVisible();
   });
 });

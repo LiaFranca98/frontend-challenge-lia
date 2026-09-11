@@ -6,7 +6,7 @@ test.describe('Authenticated Checkout Flow', () => {
     await page.goto('/login');
     await page.fill('input[type="email"]', 'demo@example.com');
     await page.fill('input[type="password"]', 'password123');
-    await page.locator('main').getByRole('button', { name: 'Entrar' }).click();
+    await page.locator('form').getByRole('button', { name: 'Entrar' }).click();
     
     // Wait for redirect to home
     await page.waitForURL('**/');
@@ -21,12 +21,12 @@ test.describe('Authenticated Checkout Flow', () => {
     await page.locator('text=Finalizar Compra').click();
     
     // 4. In Checkout, verify UI
-    await expect(page.getByRole('heading', { name: 'Checkout' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Perfil do colecionador' })).toBeVisible();
     
     // 5. Submit Order
-    await page.getByRole('button', { name: 'Confirmar Compra' }).click();
+    await page.getByRole('button', { name: 'Confirmar compra' }).click();
     
     // 6. Confirm success
-    await expect(page.getByText('Compra Confirmada!')).toBeVisible();
+    await expect(page.getByText('Seus NFTs agora estão na sua carteira')).toBeVisible();
   });
 });

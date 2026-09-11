@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw';
+import { http, HttpResponse, delay } from 'msw';
 import { db, saveDb } from '../db';
 import { getUserFromAuth } from './auth';
 import type { CartItem, Order } from '@/domain/types';
@@ -8,6 +8,19 @@ const processedOrders = new Map<string, Order>();
 
 export const checkoutHandlers = [
   http.post('/api/checkout', async ({ request }) => {
+    // Add baseline latency
+    await delay(1000);
+    
+    // Check for simulated errors via headers
+    const simulateError = request.headers.get('x-simulate-error');
+    if (simulateError === 'timeout') {
+      await delay(5000);
+      return HttpResponse.json({ message: 'Gateway Timeout' }, { status: 504 });
+    }
+    if (simulateError === '500') {
+      return HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }
+
     const user = getUserFromAuth(request);
     const { items, idempotencyKey } = await request.json() as { items: CartItem[], idempotencyKey?: string };
     
@@ -46,11 +59,13 @@ export const checkoutHandlers = [
       }, { status: 409 });
     }
 
+    const isPaymentDeclined = simulateError === 'payment_declined';
+
     const order: Order = {
       id: `order-${Date.now()}`,
       userId: user ? user.id : 'guest',
       walletId: user && user.wallets.length > 0 ? user.wallets[0].id : 'guest-wallet',
-      status: 'confirmed',
+      status: isPaymentDeclined ? 'rejected' : 'confirmed',
       items: successfulItems,
       subtotalEth: subtotalEth.toString(),
       networkFeeEth: '0.005',
@@ -67,13 +82,15 @@ export const checkoutHandlers = [
       processedOrders.set(idempotencyKey, order);
     }
 
-    // Clear successful items from the cart
-    const sessionId = request.headers.get('Authorization');
-    if (sessionId) {
-      const currentCart = db.carts.get(sessionId) || [];
-      const newCart = currentCart.filter(c => !successfulItems.some(s => s.nftId === c.nftId));
-      db.carts.set(sessionId, newCart);
-      saveDb();
+    // Clear successful items from the cart if not declined
+    if (!isPaymentDeclined) {
+      const sessionId = request.headers.get('Authorization');
+      if (sessionId) {
+        const currentCart = db.carts.get(sessionId) || [];
+        const newCart = currentCart.filter(c => !successfulItems.some(s => s.nftId === c.nftId));
+        db.carts.set(sessionId, newCart);
+        saveDb();
+      }
     }
 
     return HttpResponse.json({ 

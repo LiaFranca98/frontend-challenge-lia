@@ -39,17 +39,17 @@ export const authHandlers = [
           id: 'user-demo',
           name: 'Demo User',
           email: 'demo@example.com',
-          wallets: [{ address: '0x123...abc', balance: '10.5 ETH' }]
+          wallets: [{ id: 'w1', address: '0x123...abc', network: 'Ethereum', isPrimary: true }]
         };
-        db.users.push(user);
+        db.users.push(user as User);
         saveDb();
       } else {
         return HttpResponse.json({ message: 'Invalid credentials' }, { status: 401 });
       }
     }
 
-    const token = `token-${user.id}-${Date.now()}`;
-    db.sessions.set(token, user.id);
+    const token = `token-${user!.id}-${Date.now()}`;
+    db.sessions.set(token, user!.id);
     saveDb();
 
     return HttpResponse.json({ user, token }, {

@@ -13,6 +13,7 @@ export function useAuth() {
     },
     retry: false,
     staleTime: 5 * 60 * 1000,
+    enabled: !!localStorage.getItem('auth-token'),
   });
 
   const loginMutation = useMutation({

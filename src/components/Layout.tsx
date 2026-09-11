@@ -11,7 +11,7 @@ export function Layout() {
     <div className="flex min-h-screen flex-col">
       <Header />
       <CartDrawer />
-      <main className="flex-1 bg-background text-foreground">
+      <main id="main-content" className="flex-1 bg-background text-foreground">
         <Outlet />
       </main>
       <Footer />

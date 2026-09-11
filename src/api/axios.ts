@@ -9,5 +9,12 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
+  
+  // E2E Test Injection
+  const simulateError = localStorage.getItem('simulate-error');
+  if (simulateError) {
+    config.headers['x-simulate-error'] = simulateError;
+  }
+  
   return config;
 });
