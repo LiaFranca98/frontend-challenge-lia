@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Agent & Specification Tooling
+.agents
+.specify
+specs/
+
+# Test artifacts & reports
+test-results/
+playwright-report/
+blob-report/
+*.report.html
+lighthouse-report.json
+
